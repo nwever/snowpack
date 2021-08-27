@@ -1,9 +1,9 @@
 #!/bin/bash
 
-year_start=1980
-year_end=2019
+year_start=1996
+year_end=1997
 temporal_res=3600 # In seconds
-model="MERRA-2"
+model="COSMO-2"
 
 rm -f to_exec.lst
 

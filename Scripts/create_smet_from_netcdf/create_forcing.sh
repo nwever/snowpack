@@ -15,7 +15,7 @@ if [ -z "${model}" ] && [ -z "${year}" ]; then
 	exit
 fi
 
-if [ ${model} != "MERRA-2" ] && [ ${model} != "CESM" ] && [ ${model} != "RACMO2" ]; then
+if [ ${model} != "MERRA-2" ] && [ ${model} != "CESM" ] && [ ${model} != "RACMO2" ] && [ ${model} != "COSMO-2" ] && [ ${model} != "COSMO-1" ]; then
 	echo "Only MERRA-2, CESM or RACMO2 supported as model."
 	exit
 fi
@@ -27,8 +27,8 @@ echo "	Year ${yr}"
 # Module loading and basic setup
 mkdir -p log
 export LD_LIBRARY_PATH=$(pwd)/usr/lib/:${LD_LIBRARY_PATH}
-module purge
-ml intel; ml proj; ml netcdf
+# module purge
+# ml intel; ml proj; ml netcdf
 
 # Create output directory
 rm -r output/${model}_${yr}
@@ -75,7 +75,11 @@ output_res_in_minutes=$(echo ${output_res_in_seconds} / 60 | bc)							# In minu
 if [ ${model} == "MERRA-2" ]; then
 	# MERRA-2 has output each :30
 	../meteoio_timeseries -b ${yr}-01-01T00:30:00 -e ${yr}-12-31T23:30:00 -c ${model}_${yr}.ini -s ${output_res_in_minutes} -p > ../log/${model}_${yr}.log 2>&1
+elif [ ${model} == "COSMO-2" ]; then
+	# COSMO-2 has output each hour, but at the 30min step:30
+	../meteoio_timeseries -b ${yr}-01-01T00:30:00 -e ${yr}-12-31T23:30:00 -c ${model}_${yr}.ini -s ${output_res_in_minutes} -p > ../log/${model}_${yr}.log 2>&1	
 else
 	# Other models have output each :00, and the following line assumes the last time step is 21:00 (i.e., 3-hourly output)
 	../meteoio_timeseries -b ${yr}-01-01T00:00:00 -e ${yr}-12-31T21:00:00 -c ${model}_${yr}.ini -s ${output_res_in_minutes} -p > ../log/${model}_${yr}.log 2>&1
+	# ../meteoio_timeseries -b ${yr}-03-01T00:00:00 -e ${yr}-03-7T23:00:00 -c ${model}_${yr}.ini -s ${output_res_in_minutes} -p > ../log/${model}_${yr}.log 2>&1
 fi
